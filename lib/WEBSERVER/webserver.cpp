@@ -6,6 +6,8 @@
 #include <esp_wifi.h>
 
 #include "debug.h"
+#include <esp_now.h>
+#include <espnow.h>
 
 static const uint8_t DNS_PORT = 53;
 static IPAddress netMsk(255, 255, 255, 0);
@@ -15,10 +17,20 @@ static AsyncWebServer server(80);
 static AsyncEventSource events("/events");
 
 static const char *wifi_hostname = "plt";
-static const char *wifi_ap_ssid_prefix = "PhobosLT";
-static const char *wifi_ap_password = "phoboslt";
-static const char *wifi_ap_address = "20.0.0.1";
+static const char *wifi_ap_ssid_prefix = "RACETIMER";
+static const char *wifi_ap_password = "racetimer";
+static const char *wifi_ap_address = "22.0.0.2";
 String wifi_ap_ssid;
+
+void sendDiscoveryPacket() {
+    uint8_t myMac[6];
+    esp_read_mac(myMac, ESP_MAC_WIFI_STA);
+    DEBUG("My MAC: %02X:%02X:%02X:%02X:%02X:%02X\n", myMac[0], myMac[1], myMac[2], myMac[3], myMac[4], myMac[5]);
+
+    // Prepara o pacote com o MAC do dispositivo
+    DiscoveryPacket packet;
+    memcpy(packet.mac, myMac, 6);
+}
 
 void Webserver::init(Config *config, LapTimer *lapTimer, BatteryMonitor *batMonitor, Buzzer *buzzer, Led *l) {
 
@@ -35,7 +47,13 @@ void Webserver::init(Config *config, LapTimer *lapTimer, BatteryMonitor *batMoni
 
     WiFi.persistent(false);
     WiFi.disconnect();
-    WiFi.mode(WIFI_OFF);
+
+
+    // WiFi.mode(WIFI_OFF);
+    // WiFi.mode(WIFI_OFF);
+    // Inicializa o Wi-Fi no modo STA
+    WiFi.mode(WIFI_STA);
+
     WiFi.setTxPower(WIFI_POWER_19_5dBm);
     esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_LR);
     esp_wifi_set_protocol(WIFI_IF_AP, WIFI_PROTOCOL_LR);
@@ -115,6 +133,11 @@ void Webserver::handleWebUpdate(uint32_t currentTimeMs) {
 
                 WiFi.disconnect();
                 wifiMode = WIFI_AP;
+                if (esp_now_init() == ESP_OK) {
+                    DEBUG("ESP-NOW WIFI_AP inicializado com sucesso\n");
+                } else {
+                    DEBUG("Erro ao inicializar ESP-NOW WIFI_AP\n");
+                }
                 WiFi.setHostname(wifi_hostname);  // hostname must be set before the mode is set to STA
                 WiFi.mode(wifiMode);
                 changeTimeMs = currentTimeMs;
