@@ -1,57 +1,58 @@
 #include "espnow.h"
 #include <esp_now.h>
 #include <debug.h>
+#include <led.h>
+#include <WiFi.h>
 
-void EspNow::init() {
+void EspNow::init(Led *l) {
     DEBUG("EspNow::init\n");
+    led = l;
+
+    // Certifique-se de desativar o Wi-Fi antes de reconfigurá-lo
+    WiFi.disconnect();
+    // Inicializa o ESP-NOW
+    if (esp_now_init() == ESP_OK) {
+        DEBUG("ESP-NOW inicializado com sucesso\n");
+    } else {
+        DEBUG("Erro ao inicializar ESP-NOW\n");
+    }
+
+    esp_now_peer_info_t peerInfo = {};
+    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+
+    if (!esp_now_is_peer_exist(broadcastAddress)) {
+        if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+            DEBUG("Erro ao adicionar peer\n");
+        }
+    }
+
+    esp_now_register_recv_cb(onReceive);
+    esp_now_register_send_cb(onSent);
 }
 
-void EspNow::sendDiscoveryPacket() {
-    DEBUG("sendDiscoveryPacket\n");
-
-    uint8_t myMac[6];
-    esp_read_mac(myMac, ESP_MAC_WIFI_STA); // Pega o MAC do dispositivo atual
-    
-    // Prepara o pacote com o MAC do dispositivo
-    DiscoveryPacket packet;
-    memcpy(packet.mac, myMac, 6);
-
-    // Envia o pacote para todos os dispositivos
-    for (int i = 0; i < MAX_DEVICES; i++) {
-        if (devices[i].discovered) {
-            esp_now_send(devices[i].macAddress, (uint8_t*)&packet, sizeof(packet));
-        }
+void onReceive(const uint8_t *macAddr, const uint8_t *data, int len) {
+    DEBUG("Dispositivo encontrado: ");
+    for (int i = 0; i < 6; i++) {
+        DEBUG("%02X", macAddr[i]);
+        if (i < 5) DEBUG(":");
     }
+    DEBUG("\n");
+
+    DEBUG("Dados recebidos (string): ");
+    for (int i = 0; i < len; i++) {
+        DEBUG("%c", data[i]); // Converte cada byte para caractere
+    }
+    DEBUG("\n");
+
+    led->on(400);
+    delay(500);
+    led->off();
 }
 
-void EspNow::onDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
-    DEBUG("onDataRecv\n");
-    DiscoveryPacket packet;
-    memcpy(&packet, data, sizeof(packet));
-
-    // Verifica se o dispositivo já foi descoberto
-    bool exists = false;
-    for (int i = 0; i < numDevices; i++) {
-        if (memcmp(devices[i].macAddress, packet.mac, 6) == 0) {
-        exists = true;
-        break;
-        }
-    }
-
-    // Se não encontrou, adiciona o dispositivo à lista
-    if (!exists && numDevices < MAX_DEVICES) {
-        memcpy(devices[numDevices].macAddress, packet.mac, 6);
-        devices[numDevices].discovered = true;
-        numDevices++;
-    }
-
-    // Exibe os dispositivos conhecidos
-    Serial.println("Dispositivos conhecidos:");
-    for (int i = 0; i < numDevices; i++) {
-        for (int j = 0; j < 6; j++) {
-        Serial.print(devices[i].macAddress[j], HEX);
-        Serial.print(":");
-        }
-        Serial.println();
+void onSent(const uint8_t *macAddr, esp_now_send_status_t status) {
+    if(status != ESP_NOW_SEND_SUCCESS) {
+        DEBUG("Falha no envio de pacote\n");
     }
 }

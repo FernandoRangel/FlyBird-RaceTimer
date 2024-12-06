@@ -1,24 +1,19 @@
 #include <Arduino.h>
+#include <led.h>
+#include <esp_now.h>
 
 class EspNow {
    public:
-    void init();
-    void sendDiscoveryPacket();
-    void onDataRecv(const uint8_t *mac, const uint8_t *data, int len);
+    void init(Led *l);
+    void onReceive(const uint8_t *macAddr, const uint8_t *data, int len);
+    void onSent(const uint8_t *macAddr, esp_now_send_status_t status);
+
+    private:
+      Led *led;
+      Packet dataToSend;
+      uint8_t broadcastAddress[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 };
 
-
-#define MAX_DEVICES 10 // Número máximo de dispositivos na rede
-
-struct DeviceInfo {
-  uint8_t macAddress[6]; // Endereço MAC do dispositivo
-  bool discovered;       // Indica se o dispositivo foi descoberto
-};
-
-DeviceInfo devices[10];
-
-int numDevices = 0; // Contador de dispositivos descobertos
-
-struct DiscoveryPacket {
-  uint8_t mac[6]; // Endereço MAC do dispositivo
-};
+typedef struct {
+  char message[32];
+} Packet;

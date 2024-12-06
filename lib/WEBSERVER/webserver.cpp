@@ -7,7 +7,6 @@
 
 #include "debug.h"
 #include <esp_now.h>
-#include <espnow.h>
 
 static const uint8_t DNS_PORT = 53;
 static IPAddress netMsk(255, 255, 255, 0);
@@ -21,16 +20,6 @@ static const char *wifi_ap_ssid_prefix = "RACETIMER";
 static const char *wifi_ap_password = "racetimer";
 static const char *wifi_ap_address = "22.0.0.2";
 String wifi_ap_ssid;
-
-void sendDiscoveryPacket() {
-    uint8_t myMac[6];
-    esp_read_mac(myMac, ESP_MAC_WIFI_STA);
-    DEBUG("My MAC: %02X:%02X:%02X:%02X:%02X:%02X\n", myMac[0], myMac[1], myMac[2], myMac[3], myMac[4], myMac[5]);
-
-    // Prepara o pacote com o MAC do dispositivo
-    DiscoveryPacket packet;
-    memcpy(packet.mac, myMac, 6);
-}
 
 void Webserver::init(Config *config, LapTimer *lapTimer, BatteryMonitor *batMonitor, Buzzer *buzzer, Led *l) {
 
@@ -49,7 +38,6 @@ void Webserver::init(Config *config, LapTimer *lapTimer, BatteryMonitor *batMoni
     WiFi.disconnect();
 
 
-    // WiFi.mode(WIFI_OFF);
     // WiFi.mode(WIFI_OFF);
     // Inicializa o Wi-Fi no modo STA
     WiFi.mode(WIFI_STA);
