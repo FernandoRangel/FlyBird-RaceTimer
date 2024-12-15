@@ -273,12 +273,14 @@ Network:\n\
 \tMAC:\t%s\n\
 EEPROM:\n\
 %s\n\
-Battery Voltage:\t%0.1fv";
+Battery Voltage:\t%0.1fv\n\
+LapTimerState:\t%u\n";
+
 
         snprintf(buf, sizeof(buf), format,
                  ESP.getFreeHeap(), ESP.getMinFreeHeap(), ESP.getHeapSize(), ESP.getMaxAllocHeap(), LittleFS.usedBytes(), LittleFS.totalBytes(),
                  ESP.getChipModel(), ESP.getChipRevision(), ESP.getChipCores(), ESP.getSdkVersion(), ESP.getFlashChipSize(), ESP.getFlashChipSpeed() / 1000000, getCpuFrequencyMhz(),
-                 WiFi.localIP().toString().c_str(), WiFi.macAddress().c_str(), configBuf, voltage);
+                 WiFi.localIP().toString().c_str(), WiFi.macAddress().c_str(), configBuf, voltage, timer->getState());
         request->send(200, "text/plain", buf);
         led->on(200);
     });
