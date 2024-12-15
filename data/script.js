@@ -178,8 +178,9 @@ setInterval(addRssiPoint, 200);
 
 function createRssiChart() {
   rssiChart = new SmoothieChart({
+    scrollBackwards:true,
     responsive: true,
-    millisPerPixel: 50,
+    millisPerPixel: 100,
     grid: {
       strokeStyle: 'rgba(255,255,255,0.25)',
       sharpLines: true,
