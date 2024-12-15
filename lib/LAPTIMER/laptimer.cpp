@@ -118,3 +118,7 @@ uint32_t LapTimer::getLapTime() {
 bool LapTimer::isLapAvailable() {
     return lapAvailable;
 }
+
+uint8_t LapTimer::getState() {
+    return state;
+}
