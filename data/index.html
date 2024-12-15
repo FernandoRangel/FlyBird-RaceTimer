@@ -112,8 +112,8 @@
       <input type="range" style="width:100%" min="50" max="255" step="1" id="exit" value="100" oninput="updateExitRssi(this,value)">
     </div>
     <button onclick="saveConfig()">Save RSSI Thresholds</button>
-    <div>
-      <canvas id="rssiChart" style="height:300px;width:100%"></canvas>
+    <div style="overflow: scroll;">
+      <canvas id="rssiChart" style="height:300px;width:2000px"></canvas>
     </div>
   </div>
   <script src="script.js"></script>
