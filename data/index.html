@@ -4,6 +4,7 @@
 <head>
   <title>Phobos LapTimer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="favicon.ico">
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="jquery-3.7.1.min.js"></script>
@@ -17,8 +18,10 @@
     <img src="favicon.ico" alt="PLT" style="width:64px;">
     Phobos LapTimer
   </h1>
-  <p id="battery">Battery Voltage: --</p>
-
+  <div>
+    <p id="battery">Battery Voltage: --</p>
+    <p id="temperature">Temperature: --</p>
+  </div>
   <div class="tab">
     <button class="tablinks" onclick="openTab(event, 'config')">Configuration</button>
     <button class="tablinks" id="raceTab" onclick="openTab(event, 'race')">Race</button>
