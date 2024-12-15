@@ -180,7 +180,21 @@ void Config::handleEeprom(uint32_t currentTimeMs) {
 
 void Config::addNewLapHistory(uint32_t lapTime) {
     int countLaps = std::count_if(conf.lapsHistory, conf.lapsHistory + CONFIG_LAPS_HISTORY_LENGTH, [](int x) { return x != -1; });
-    conf.lapsHistory[countLaps] = lapTime;
+
+    if(countLaps < CONFIG_LAPS_HISTORY_LENGTH) {
+        conf.lapsHistory[countLaps] = lapTime;
+    } else {
+        uint32_t fastestlap = *std::min_element(std::begin(conf.lapsHistory), std::end(conf.lapsHistory));
+
+        if (conf.lapsHistory[0] != fastestlap) {
+          std::rotate(conf.lapsHistory, conf.lapsHistory + 1, conf.lapsHistory + CONFIG_LAPS_HISTORY_LENGTH);
+        } else {
+          std::rotate(conf.lapsHistory + 1, conf.lapsHistory + 2, conf.lapsHistory + CONFIG_LAPS_HISTORY_LENGTH);
+        }
+        
+        conf.lapsHistory[CONFIG_LAPS_HISTORY_LENGTH - 1] = lapTime;
+    }
+    
     modified = true;
 }
 
