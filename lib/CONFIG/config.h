@@ -52,7 +52,7 @@
 #define PIN_LED 21
 #define PIN_VBAT 35
 #define VBAT_SCALE 2
-#define VBAT_ADD 2
+#define VBAT_ADD 4
 #define PIN_RX5808_RSSI 33
 #define PIN_RX5808_DATA 19   //CH1
 #define PIN_RX5808_SELECT 22 //CH2
@@ -66,6 +66,7 @@
 #define CONFIG_MAGIC_MASK (0b11U << 30)
 #define CONFIG_MAGIC (0b01U << 30)
 #define CONFIG_VERSION 0U
+#define CONFIG_LAPS_HISTORY_LENGTH 33
 
 #define EEPROM_CHECK_TIME_MS 1000
 
@@ -81,6 +82,7 @@ typedef struct {
     char pilotName[21];
     char ssid[33];
     char password[33];
+    uint32_t lapsHistory[CONFIG_LAPS_HISTORY_LENGTH];
 } laptimer_config_t;
 
 class Config {
@@ -92,6 +94,8 @@ class Config {
     void toJsonString(char* buf);
     void fromJson(JsonObject source);
     void handleEeprom(uint32_t currentTimeMs);
+    void addNewLapHistory(uint32_t lapTime);
+    void eraseLapsHistory();
 
     // getters and setters
     uint16_t getFrequency();

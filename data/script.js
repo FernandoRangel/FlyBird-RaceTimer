@@ -32,7 +32,6 @@ var enterRssi = 120,
 var frequency = 0;
 var announcerRate = 1.0;
 
-var lapNo = 0;
 var last2laps = [];
 
 var timerInterval;
@@ -52,6 +51,29 @@ var maxRssiValue = enterRssi + 10;
 var minRssiValue = exitRssi - 10;
 var arrayLaps = [];
 
+function setLapshistory(lapsHistory) {
+  let lapTable = document.getElementById('lapTable');
+  
+  if(lapsHistory.length > 0) {
+    lapsHistory.forEach((lap, index) => {
+      var lapFormated = (parseFloat(lap) / 1000).toFixed(2);
+
+      let newLine = lapTable.insertRow();
+      newLine.insertCell(0).innerHTML = index + 1;
+      newLine.insertCell(1).innerHTML = lapFormated;
+      newLine.insertCell(2).innerHTML = '-';
+      newLine.insertCell(3).innerHTML = '-';
+
+      arrayLaps.push(lapFormated);
+
+      const fastestlap = Math.min(...arrayLaps).toFixed(2);
+      if (fastestlap.toString() === lapFormated) {
+        fastestlaptimeElem.innerText = "Fastest Lap Time: " + fastestlap + "s";
+      }
+    });
+  }
+}
+
 onload = function (e) {
   calib.style.display = "none";
   race.style.display = "none";
@@ -62,7 +84,7 @@ onload = function (e) {
   fetch("/config")
     .then((response) => response.json())
     .then((config) => {
-      console.log(config);
+      console.log({config});
       setBandChannelIndex(config.freq);
       minLapInput.value = (parseFloat(config.minLap) / 10).toFixed(1);
       updateMinLap(minLapInput, minLapInput.value);
@@ -83,8 +105,8 @@ onload = function (e) {
       startRaceButton.disabled = false;
       clearInterval(timerInterval);
       timer.innerHTML = "00:00:00 s";
-      clearLaps();
       createRssiChart();
+      setLapshistory(config.lapsHistory);
     });
 
   fetch("/status")
@@ -313,18 +335,21 @@ function beep(duration, frequency, type) {
 
 function addLap(lapStr) {
   $().articulate("stop");
+
+  const timelap = parseFloat(lapStr).toFixed(2);
+  arrayLaps.push(timelap);
+
   const pilotName = pilotNameInput.value;
   var last2lapStr = "";
   var last3lapStr = "";
   const newLap = parseFloat(lapStr);
-  lapNo += 1;
   const table = document.getElementById("lapTable");
-  const row = table.insertRow(lapNo);
+  const row = table.insertRow(arrayLaps.length);
   const cell1 = row.insertCell(0);
   const cell2 = row.insertCell(1);
   const cell3 = row.insertCell(2);
   const cell4 = row.insertCell(3);
-  cell1.innerHTML = lapNo;
+  cell1.innerHTML = arrayLaps.length;
   cell2.innerHTML = lapStr;
   if (last2laps.length >= 1) {
     last2lapStr = (newLap + last2laps[last2laps.length - 1]).toFixed(2);
@@ -345,8 +370,8 @@ function addLap(lapStr) {
       beep(100, 330, "square");
       break;
     case "1lap":
-      const lapNoStr = pilotName + " Lap " + lapNo + ", ";
-      speakText = "<p>" + lapNoStr + lapStr.replace(".", ",") + "</p>";
+      const lapNoStr = pilotName + "Lap " + arrayLaps.length.toString() + " ";
+      speakText = lapNoStr + lapStr.replace(".", ",");
       break;
     case "2lap":
       if (last2lapStr != "") {
@@ -373,8 +398,6 @@ function addLap(lapStr) {
   }
   last2laps.push(newLap);
 
-  const timelap = parseFloat(lapStr).toFixed(2);
-  arrayLaps.push(timelap);
   const fastestlap = Math.min(...arrayLaps).toFixed(2);
 
   if (fastestlap.toString() === timelap.toString()) {
@@ -461,10 +484,19 @@ function clearLaps() {
   for (var i = tableHeaderRowCount; i < rowCount; i++) {
     lapTable.deleteRow(tableHeaderRowCount);
   }
-  lapNo = 0;
   last2laps = [];
   arrayLaps = [];
   fastestlaptimeElem.innerText = "Fastest Lap Time: --";
+
+  fetch('/eraseLapsHistory', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => response.json())
+    .then(response => console.log('/eraseLapsHistory:' + JSON.stringify(response)))
 }
 
 if (!!window.EventSource) {
