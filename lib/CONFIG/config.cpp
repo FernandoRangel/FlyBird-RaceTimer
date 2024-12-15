@@ -59,6 +59,10 @@ void Config::toJson(AsyncResponseStream& destination) {
     config["name"] = conf.pilotName;
     config["ssid"] = conf.ssid;
     config["pwd"] = conf.password;
+
+    JsonArray lapsHistoryArray = config.createNestedArray("lapsHistory");
+    std::for_each(conf.lapsHistory, conf.lapsHistory + CONFIG_LAPS_HISTORY_LENGTH, [&](int x) { if (x != -1) lapsHistoryArray.add(x); });
+    
     serializeJson(config, destination);
 }
 
@@ -172,4 +176,29 @@ void Config::handleEeprom(uint32_t currentTimeMs) {
         checkTimeMs = currentTimeMs;
         write();
     }
+}
+
+void Config::addNewLapHistory(uint32_t lapTime) {
+    int countLaps = std::count_if(conf.lapsHistory, conf.lapsHistory + CONFIG_LAPS_HISTORY_LENGTH, [](int x) { return x != -1; });
+
+    if(countLaps < CONFIG_LAPS_HISTORY_LENGTH) {
+        conf.lapsHistory[countLaps] = lapTime;
+    } else {
+        uint32_t fastestlap = *std::min_element(std::begin(conf.lapsHistory), std::end(conf.lapsHistory));
+
+        if (conf.lapsHistory[0] != fastestlap) {
+          std::rotate(conf.lapsHistory, conf.lapsHistory + 1, conf.lapsHistory + CONFIG_LAPS_HISTORY_LENGTH);
+        } else {
+          std::rotate(conf.lapsHistory + 1, conf.lapsHistory + 2, conf.lapsHistory + CONFIG_LAPS_HISTORY_LENGTH);
+        }
+        
+        conf.lapsHistory[CONFIG_LAPS_HISTORY_LENGTH - 1] = lapTime;
+    }
+    
+    modified = true;
+}
+
+void Config::eraseLapsHistory() {
+    std::fill(std::begin(conf.lapsHistory), std::end(conf.lapsHistory), -1);
+    modified = true;
 }

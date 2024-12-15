@@ -14,10 +14,10 @@ static IPAddress ipAddress;
 static AsyncWebServer server(80);
 static AsyncEventSource events("/events");
 
-static const char *wifi_hostname = "plt";
-static const char *wifi_ap_ssid_prefix = "PhobosLT";
-static const char *wifi_ap_password = "phoboslt";
-static const char *wifi_ap_address = "20.0.0.1";
+static const char *wifi_hostname = "racetimer";
+static const char *wifi_ap_ssid_prefix = "Racetimer";
+static const char *wifi_ap_password = "racetimer";
+static const char *wifi_ap_address = "22.0.0.2";
 String wifi_ap_ssid;
 
 void Webserver::init(Config *config, LapTimer *lapTimer, BatteryMonitor *batMonitor, Buzzer *buzzer, Led *l) {
@@ -59,6 +59,7 @@ void Webserver::sendLaptimeEvent(uint32_t lapTime) {
     if (!servicesStarted) return;
     char buf[16];
     snprintf(buf, sizeof(buf), "%u", lapTime);
+    conf->addNewLapHistory(lapTime);
     events.send(buf, "lap");
 }
 
@@ -170,7 +171,7 @@ static bool captivePortal(AsyncWebServerRequest *request) {
     extern const char *wifi_hostname;
 
     if (!isIp(request->host()) && request->host() != (String(wifi_hostname) + ".local")) {
-        DEBUG("Request redirected to captive portal\n");
+        //DEBUG("Request redirected to captive portal\n");
         request->redirect(String("http://") + toStringIp(request->client()->localIP()));
         return true;
     }
@@ -320,6 +321,11 @@ Battery Voltage:\t%0.1fv";
         conf->fromJson(jsonObj);
         request->send(200, "application/json", "{\"status\": \"OK\"}");
         led->on(200);
+    });
+
+    server.on("/eraseLapsHistory", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        conf->eraseLapsHistory();
+        request->send(200, "application/json", "{\"status\": \"OK\"}");
     });
 
     server.serveStatic("/", LittleFS, "/").setCacheControl("max-age=600");
