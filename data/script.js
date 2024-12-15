@@ -79,8 +79,6 @@ onload = function (e) {
   race.style.display = "none";
   config.style.display = "block";
 
-  var batteryElem = document.getElementById("battery")
-
   fetch("/config")
     .then((response) => response.json())
     .then((config) => {
@@ -114,9 +112,15 @@ onload = function (e) {
     .then((response) => {
       console.log({response});
 
+      var batteryElem = document.getElementById("battery");
       const batteryVoltageMatch = response.match(/Battery Voltage:\s*([\d.]+v)/);
       const batteryVoltage = batteryVoltageMatch ? batteryVoltageMatch[1] : null;
       batteryElem.innerText = "Battery Voltage: " + batteryVoltage;
+
+      var temperatureElem = document.getElementById("temperature");
+      const temperatureMatch = response.match(/Temperature:\s*(-?\d+(\.\d+)?)/);
+      const temperature = temperatureMatch ? temperatureMatch[1] : null;
+      temperatureElem.innerText = "Temperature: " + temperature + "°C";
 
       const lapTimerStateMatch = response.match(/LapTimerState:\s*([\d.])/);
       const lapTimerState = lapTimerStateMatch ? lapTimerStateMatch[1] : null;
