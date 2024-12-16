@@ -76,3 +76,9 @@ table th {
   padding-bottom: 12px;
   text-align: left;
 }
+
+.infos {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 7px;
+}
