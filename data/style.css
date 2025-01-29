@@ -33,6 +33,24 @@
   border: 1px solid #ccc;
   border-top: none;
 }
+.tabcontent > .calibration {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tabcontent > .calibration > div {
+  display: flex;
+  gap: 10px;
+}
+.tabcontent > .calibration > div > label {
+  white-space: nowrap;
+}
+.tabcontent > .calibration > div > input[type="range"] {
+  flex-grow: 1;
+}
+.tabcontent > button {
+  margin: 10px 0px;
+}
 
 button {
   background-color: #f1f1f1;
