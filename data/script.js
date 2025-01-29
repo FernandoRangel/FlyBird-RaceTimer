@@ -261,22 +261,26 @@ function openTab(evt, tabName) {
 }
 
 function updateEnterRssi(obj, value) {
+  let enterSlider = document.getElementById("enter");
   enterRssi = parseInt(value);
-  enterRssiSpan.textContent = enterRssi;
+  enterSlider.value = enterRssi.toString();
+  enterRssiSpan.value = enterRssi.toString();
   if (enterRssi <= exitRssi) {
     exitRssi = Math.max(0, enterRssi - 1);
     exitRssiInput.value = exitRssi;
-    exitRssiSpan.textContent = exitRssi;
+    exitRssiSpan.value = exitRssi.toString();
   }
 }
 
 function updateExitRssi(obj, value) {
+  let exitSlider = document.getElementById("exit");
   exitRssi = parseInt(value);
-  exitRssiSpan.textContent = exitRssi;
+  exitSlider.value = exitRssi.toString();
+  exitRssiSpan.value = exitRssi.toString();
   if (exitRssi >= enterRssi) {
     enterRssi = Math.min(255, exitRssi + 1);
     enterRssiInput.value = enterRssi;
-    enterRssiSpan.textContent = enterRssi;
+    enterRssiSpan.value = enterRssi.toString();
   }
 }
 

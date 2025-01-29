@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Phobos LapTimer</title>
+  <title>FlyBird-RaceTimer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="favicon.ico">
@@ -14,13 +14,13 @@
 
 <body>
 
-  <h1 style="display:table-cell;vertical-align:middle">
+  <!-- <h1 style="display:table-cell;vertical-align:middle">
     <img src="favicon.ico" alt="PLT" style="width:64px;">
     Phobos LapTimer
-  </h1>
-  <div>
-    <p id="battery">Battery Voltage: --</p>
-    <p id="temperature">Temperature: --</p>
+  </h1> -->
+  <div class="infos">
+    <span id="battery">Battery Voltage: --</span>
+    <span id="temperature">Temperature: --</span>
   </div>
   <div class="tab">
     <button class="tablinks" onclick="openTab(event, 'config')">Configuration</button>
@@ -104,15 +104,17 @@
   </div>
 
   <div id="calib" class="tabcontent">
-    <div>
-      <label for="enter">Enter RSSI:</label>
-      <span id="enterSpan" class="val">120</span>
-      <input type="range" style="width:100%" min="50" max="255" step="1" id="enter" value="120" oninput="updateEnterRssi(this,value)">
-    </div>
-    <div>
-      <label for="exit">Exit RSSI:</label>
-      <span id="exitSpan" class="val">100</span>
-      <input type="range" style="width:100%" min="50" max="255" step="1" id="exit" value="100" oninput="updateExitRssi(this,value)">
+    <div class="calibration">
+      <div>
+        <label for="enter">Enter RSSI:</label>
+        <input type="number" id="enterSpan" value="120" min="50" max="255" onchange="updateEnterRssi(this,value)" />
+        <input type="range" style="width:100%" min="50" max="255" step="1" id="enter" value="120" oninput="updateEnterRssi(this,value)">
+      </div>
+      <div>
+        <label for="exit">Exit RSSI:</label>
+        <input type="number" id="exitSpan" value="100" min="50" max="255" onchange="updateExitRssi(this,value)" />
+        <input type="range" style="width:100%" min="50" max="255" step="1" id="exit" value="100" oninput="updateExitRssi(this,value)">
+      </div>
     </div>
     <button onclick="saveConfig()">Save RSSI Thresholds</button>
     <div style="overflow: scroll;">
